@@ -6,6 +6,8 @@ recorded in schema_migrations. Idempotent: re-running skips applied versions.
 
 import logging
 
+logger = logging.getLogger(__name__)
+
 MIGRATIONS: list[tuple[int, list[str]]] = [
     (1, [
         # ---- 0. meta ----
@@ -210,6 +212,12 @@ MIGRATIONS: list[tuple[int, list[str]]] = [
         "CREATE INDEX IF NOT EXISTS idx_pending_status ON pending_methods(status)",
         "CREATE INDEX IF NOT EXISTS idx_pending_hash ON pending_methods(content_hash)",
         "CREATE INDEX IF NOT EXISTS idx_pending_src_msg ON pending_methods(source_chat_id, source_message_id)",
+    ]),
+    
+    # ---- Phase 5: Dynamic key management ----
+    (2, [
+        "ALTER TABLE api_key_status ADD COLUMN key_cipher TEXT NOT NULL DEFAULT ''",
+        "ALTER TABLE api_key_status ADD COLUMN key_source TEXT NOT NULL DEFAULT 'ENV'",
     ]),
 ]
 
