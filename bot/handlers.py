@@ -1,5 +1,5 @@
 """
-Telegram update handlers. Phase 3: messages route through core.router.
+Telegram update handlers. Phase 4: pass user/chat into router for templates.
 """
 
 import html
@@ -46,11 +46,15 @@ async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     if message is None or message.text is None:
         return
     router = context.bot_data.get("router")
-    if router is None:  # DB not ready (e.g. first startup race) — fail soft
+    if router is None:
         await message.reply_text("⚠️ Bot is still starting up. Try again in a second.")
         return
 
-    text, meta = await router.handle_text(message.text)
+    text, meta = await router.handle_text(
+        message.text,
+        user=update.effective_user,
+        chat=update.effective_chat,
+    )
     logger.info(
         "on_message chat_id=%s source=%s trigger=%s type=%s conf=%s latency=%sms",
         update.effective_chat.id if update.effective_chat else None,
